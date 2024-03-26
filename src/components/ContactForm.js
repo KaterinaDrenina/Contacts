@@ -1,27 +1,37 @@
-import React, { useState } from 'react';
+import React, { Component } from 'react';
 
-function ContactForm({ addContact, setShowForm }) {
-    const [newContact, setNewContact] = useState({ name: '', lastName: '', phone: '' });
+class ContactForm extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { name: '', lastName: '', phone: '' };
 
-    const handleChange = (e) => {
-        setNewContact({ ...newContact, [e.target.name]: e.target.value});
-    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        addContact(newContact);
-        setNewContact({ name: '', lastName: '', phone: '' });
-    };
+  handleChange(e) {
+    this.setState({ [e.target.name]: e.target.value });
+  }
+
+  handleSubmit(e) {
+    this.props.addContact(this.state);
+    this.setState({ name: '', lastName: '', phone: '' });
+    this.props.setShowForm(false);
+  }
+
+  render() {
+    const { name, lastName, phone } = this.state;
 
     return (
-        <form onSubmit={handleSubmit} className='form'>
-            <input className='input' name='name' value={newContact.name} onChange={handleChange} placeholder='name' required />
-            <input className='input' name='lastName' value={newContact.lastName} onChange={handleChange} placeholder='last name' />
-            <input className='input'name='phone' value={newContact.phone} onChange={handleChange} placeholder='phone' required />
-            <button type='submit' className='button save-button'>Save</button>
-            <button type='button' onClick={() => setShowForm(false)} className='button cancel-button'>Cancel</button>
-        </form>
+      <form onSubmit={this.handleSubmit} className='form'>
+        <input name="name" value={name} onChange={this.handleChange} placeholder="Name" required className='input'/>
+        <input name="lastName" value={lastName} onChange={this.handleChange} placeholder="Last name" className='input'/>
+        <input name="phone" value={phone} onChange={this.handleChange} placeholder="Phone" required className='input' />
+        <button type="submit" className='button save-button'>Save</button>
+        <button type="button" onClick={() => this.props.setShowForm(false)} className='button cancel-button'>Cancel</button>
+      </form>
     );
+  }
 }
 
 export default ContactForm;

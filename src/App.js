@@ -1,45 +1,65 @@
-import React, { useState, useEffect } from 'react';
+import React, { Component } from 'react';
 import ContactsTable from './components/ContactsTable';
 import ContactForm from './components/ContactForm';
 import './App.css';
 
-function App() {
-  const [contacts, setContacts] = useState([]);
-  const [showForm, setShowForm] = useState(false);
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      contacts: [],
+      showForm: false,
+    };
 
-  useEffect(() => {
+    this.addContact = this.addContact.bind(this);
+    this.deleteContact = this.deleteContact.bind(this);
+    this.setShowForm = this.setShowForm.bind(this);
+  }
+
+  componentDidMount() {
     fetch('https://jsonplaceholder.typicode.com/users')
-    .then(response => response.json())
-    .then(data => {
-      const formattedData = data.map(({ id, name, phone }) => ({
-        id,
-        name: name.split(' ')[0],
-        lastName: name.split(' ')[1] || '',
-        phone
-      }));
-      setContacts(formattedData);
-    });
-  }, []);
+      .then(response => response.json())
+      .then(data => {
+        const formattedData = data.map(({ id, name, phone }) => ({
+          id,
+          name: name.split(' ')[0],
+          lastName: name.split(' ')[1] || '',
+          phone,
+        }));
+        this.setState({ contacts: formattedData });
+      });
+  }
 
-  const addContact = (newContact) => {
-    setContacts([...contacts, { ...newContact, id: Date.now() }]);
-    setShowForm(false);
-  };
+  addContact(newContact) {
+    this.setState(prevState => ({
+      contacts: [...prevState.contacts, { ...newContact, id: Date.now() }]
+    }));
+  }
 
-  const deleteContact = (id) => {
-    setContacts(contacts.filter(contact => contact.id !== id));
-  };
+  deleteContact(id) {
+    this.setState(prevState => ({
+      contacts: prevState.contacts.filter(contact => contact.id !== id)
+    }));
+  }
 
-  return (
-    <div className="App">
-      <ContactsTable contacts={ contacts } deleteContact={ deleteContact } />
-      {showForm ? (
-        <ContactForm addContact={ addContact } setShowForm={ setShowForm } />
-      ) : (
-        <button onClick={() => setShowForm(true)} className='button add-button'>Add Contact</button>
-      )}
-    </div>
-  );
+  setShowForm(show) {
+    this.setState({ showForm: show });
+  }
+
+  render() {
+    const { contacts, showForm } = this.state;
+
+    return (
+      <div>
+        <ContactsTable contacts={contacts} deleteContact={this.deleteContact} />
+        {showForm ? (
+          <ContactForm addContact={this.addContact} setShowForm={this.setShowForm} />
+        ) : (
+          <button onClick={() => this.setShowForm(true)} className='button add-button'>Add contact</button>
+        )}
+      </div>
+    );
+  }
 }
 
 export default App;
